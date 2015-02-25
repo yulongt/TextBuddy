@@ -16,7 +16,6 @@ public class TextBuddy {
 	private static final String ADDED_MESSAGE = "added to %1$s: \"%2$s\"\n";
 	private static final String DISPLAY_MESSAGE = "%1$s. %2$s\n";
 	private static final String EMPTY_MESSAGE = "%1$s is empty\n";
-	private static final String NO_FILE_MESSAGE = "No file found";
 	private static final String DELETED_MESSAGE = "deleted from %1$s: \"%2$s\"\n";
 	private static final String CANNOT_DELETE_MESSAGE = "Line does not exist in %1$s";
 	private static final String CLEARED_MESSAGE = "all content deleted from %1$s\n";
@@ -73,7 +72,7 @@ public class TextBuddy {
 	//extracts and checks command in user input, executing input if correct
 	private static void inputHandler(String userInput) {
 		String command = getCommand(userInput);
-		execute(command, userInput);
+		showToUser(execute(command, userInput));
 	}
 
 	//takes in user input and returns the command if any
@@ -85,46 +84,48 @@ public class TextBuddy {
 	}
 	
 	//executes commands given by user
-	private static void execute(String command, String userInput) {
+	public static String execute(String command, String userInput) {
+		String message = "";
 		switch(command) {
 		case "add":
-			add(userInput);
+			message = add(userInput);
 			break;
 		case "display":
 			display();
 			break;
 		case "delete":
-			delete(userInput);
+			message = delete(userInput);
 			break;
 		case "clear":
-			clear();
+			message = clear();
 			break;
 		case "exit":
 			exit();
 			break;
 		default:
-			showToUser(WRONG_COMMAND_MESSAGE);
+			message = WRONG_COMMAND_MESSAGE;
 			break;
 		}
+		return message;
 	}
 	
 	//adds the desired line into the file
-	private static void add(String userInput) {
+	private static String add(String userInput) {
 		String inputToAdd = getInput(userInput);
-		
+		String message = "";
 		try {
 			FileWriter fw = new FileWriter(inputFileName, true);
 			BufferedWriter bw = new BufferedWriter(fw);
 			 
 			bw.write(inputToAdd + "\n");
-			showToUser(formatMessage(ADDED_MESSAGE, inputFileName, inputToAdd));
-			
+			message = formatMessage(ADDED_MESSAGE, inputFileName, inputToAdd);
 			bw.close();
+
 			
 		 } catch (IOException e) {
 			 showToUser(e.getMessage());
 		 }
-		
+		return message;
 	}
 	
 	//displays the current text in file
@@ -151,8 +152,8 @@ public class TextBuddy {
 	}
 
 	//deletes indicated line from file by copying other lines into a new file, and replacing the original file with the new file
-	private static void delete(String userInput) {
-		
+	private static String delete(String userInput) {
+		String message = "";
 		int indexToDelete = Integer.parseInt(getInput(userInput));
 		
 		try {
@@ -187,28 +188,31 @@ public class TextBuddy {
 			tempFile.renameTo(inputFile);
 			
 			if (removedLine == null) {
-				showToUser(CANNOT_DELETE_MESSAGE);
+				message = CANNOT_DELETE_MESSAGE;
 			} else {
-				showToUser(formatMessage(DELETED_MESSAGE, inputFileName, removedLine));
+				message = formatMessage(DELETED_MESSAGE, inputFileName, removedLine);
 			}
 		} catch (Exception e) {
 			showToUser(e.getMessage());
 		}
+		
+		return message;
 	}
 
 	//clears all content from file
-	private static void clear() {
+	private static String clear() {
 		PrintWriter pw = null;
-		
+		String message = "";
 		try {
 			pw = new PrintWriter(inputFileName);
 			pw.close();
 			
-			showToUser(formatMessage(CLEARED_MESSAGE, inputFileName));
+			message = formatMessage(CLEARED_MESSAGE, inputFileName);
 			
 		} catch (FileNotFoundException e) {
-			showToUser(e.getMessage());
+			message = e.getMessage();
 		}
+		return message;
 	}
 	
 	//gets the input aside from the command itself
