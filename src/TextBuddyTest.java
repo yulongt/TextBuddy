@@ -101,8 +101,10 @@ public class TextBuddyTest {
 	//tests 2 cases of sort function:
 	//1) when file is empty
 	//2) when there are lines in file
+	@Test
 	public void testSort() {
 		//when file is empty
+		newTest.clear();
 		assertEquals("test.txt is empty\n", newTest.sort());
 		
 		//when there are lines in file
