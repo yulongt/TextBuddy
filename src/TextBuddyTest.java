@@ -8,6 +8,9 @@ import org.junit.*;
 public class TextBuddyTest {
 	static TextBuddy newTest;
 	static File test;
+	
+	//sets up the test
+	//initial empty file named "test.txt"
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		newTest = new TextBuddy();
@@ -16,6 +19,7 @@ public class TextBuddyTest {
 		test.deleteOnExit();
 	}
 
+	//tests for creation of new file
 	@Test
 	public void testInputFile() throws IOException {
 		assertEquals("Welcome to TextBuddy. test1.txt is created and ready for use \n", 
