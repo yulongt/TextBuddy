@@ -22,7 +22,7 @@ public class TextBuddy {
 	private static final String DELETED_MESSAGE = "deleted from %1$s: \"%2$s\"\n";
 	private static final String CANNOT_DELETE_MESSAGE = "Line does not exist in %1$s";
 	private static final String CLEARED_MESSAGE = "all content deleted from %1$s\n";
-	private static final String SEARCH_RESULTS_MESSAGE = "%1$s lines found with \"%2$s\"\n";
+	private static final String SEARCH_RESULTS_MESSAGE = "%1$s line(s) found with \"%2$s\"\n";
 	
 	private static Scanner scanner = new Scanner(System.in);
 	
@@ -208,7 +208,8 @@ public class TextBuddy {
 	//search the file for the keyword, printing the line containing the keyword along
 	//with the index in the file it is found. If no keyword is found, the user will be
 	//notified
-	private static void search(String userInput) {
+	public static String search(String userInput) {
+		String message = "";
 		String keyword = getInput(userInput);
 		int index = 1;
 		int count = 0;
@@ -223,6 +224,9 @@ public class TextBuddy {
 		
 		if (!fileScanner.hasNextLine()) {
 			showToUser(formatMessage(EMPTY_MESSAGE, inputFileName));
+			
+			//for testing only
+			message = formatMessage(EMPTY_MESSAGE, inputFileName);
 		}
 		
 		while (fileScanner.hasNextLine()) {
@@ -230,15 +234,19 @@ public class TextBuddy {
 
 			if (temp.contains(keyword)) {
 				showToUser(formatMessage(DISPLAY_MESSAGE, index + "", temp));
+				message = message.concat(formatMessage(DISPLAY_MESSAGE, index + "", temp));
 				count++;
 			}
 			index++;
 		}
 		
-		showToUser(formatMessage(SEARCH_RESULTS_MESSAGE, Integer.toString(count), keyword));
-		
 		fileScanner.close();
 		
+		showToUser(formatMessage(SEARCH_RESULTS_MESSAGE, Integer.toString(count), keyword));
+		
+		//for testing only
+		message = message.concat(formatMessage(SEARCH_RESULTS_MESSAGE, Integer.toString(count), keyword));
+		return message;
 	}	
 	
 	//finds the number of lines currently in file, sorts the lines alphabetically,
