@@ -1,9 +1,9 @@
 import java.io.*;
 import java.util.*;
 
-
+//IMPORTANT: THIS IS DEVELOPMENT VERSION, SOME METHODS ARE CHANGED TO PUBLIC FOR TESTING
+//PURPOSES!!!
 //If the specified file does not exist, TextBuddy will now create one
-//It is assumed users will not exceed 1000 lines
 //File is saved each time it is edited
 
 
@@ -12,6 +12,7 @@ public class TextBuddy {
 	private static String tempFileName = "temp.txt";
 	
 	private static final String WELCOME_MESSAGE = "Welcome to TextBuddy. %1$s is ready for use \n";
+	private static final String WELCOME_CREATED_MESSAGE = "Welcome to TextBuddy. %1$s is created and ready for use \n";
 	private static final String NO_INPUT_FILE_MESSAGE = "No file input. Please input a file.";
 	private static final String ENTER_COMMAND_MESSAGE = "command: ";
 	private static final String WRONG_COMMAND_MESSAGE = "Wrong command detected. Please check your input\n";
@@ -22,7 +23,6 @@ public class TextBuddy {
 	private static final String CANNOT_DELETE_MESSAGE = "Line does not exist in %1$s";
 	private static final String CLEARED_MESSAGE = "all content deleted from %1$s\n";
 	private static final String SEARCH_RESULTS_MESSAGE = "%1$s lines found with \"%2$s\"\n";
-	private static final int MAX_LINES = 1000;
 	
 	private static Scanner scanner = new Scanner(System.in);
 	
@@ -36,7 +36,6 @@ public class TextBuddy {
 	//checks input file exists, and informs the user TextBuddy is ready for use
 	public static void initialise(String[] args) throws IOException {
 		prepInputFile(args);
-		showToUser(formatMessage(WELCOME_MESSAGE, inputFileName));
 	}
 
 	//checks if there is file input, ensures the input file exists, saving file name if it does
@@ -46,19 +45,23 @@ public class TextBuddy {
 			exit();
 		} else {
 			String inputFileNameTemp = args[0];
-			checkFileName(inputFileNameTemp);
+			showToUser(checkFileName(inputFileNameTemp));
 		}
 	}
 
 	//sets inputFileName if the file exists, and informs the user file is ready
-	private static void checkFileName(String inputFileNameTemp) throws IOException {
+	public static String checkFileName(String inputFileNameTemp) throws IOException {
 		File newFile = new File(inputFileNameTemp);
+		inputFileName = inputFileNameTemp;
+		String message = "";
 		
 		if (!newFile.exists()) {
 			newFile.createNewFile();
+			message = formatMessage(WELCOME_CREATED_MESSAGE, inputFileName);
+		} else {
+			message = formatMessage(WELCOME_MESSAGE, inputFileName);
 		}
-		
-		inputFileName = inputFileNameTemp;
+		return message;
 	}
 	//---------------------------------------- END OF initialise() METHODS -------------------------------//
 	
@@ -241,31 +244,36 @@ public class TextBuddy {
 	//finds the number of lines currently in file, sorts the lines alphabetically,
 	//and writes over the sort lines into the file
 	private static void sort() {
+		//check the current number of lines in file
 		File newFile = new File(inputFileName);
 		Scanner fileScanner1 = null;
+		int count = 0;
+		
 		try {
 			fileScanner1 = new Scanner(newFile);
 		} catch (FileNotFoundException e) {
 			showToUser(e.getMessage());
 		}
 		
-		//check the current number of lines in file
-		int count = 0;
 		while (fileScanner1.hasNextLine()) {
 			fileScanner1.nextLine();
 			count++;
 		}
+		
 		fileScanner1.close();
 		
+		//write lines into an array, sort it, clear the file, and push the lines back 
+		//into the file
 		Scanner fileScanner2 = null;
+		String[] lines = new String[count];
+		count = 0;
+		
 		try {
 			fileScanner2 = new Scanner(newFile);
 		} catch (FileNotFoundException e) {
 			showToUser(e.getMessage());
 		}
 		
-		String[] lines = new String[count];
-		count = 0;
 		while (fileScanner2.hasNextLine()) {
 			lines[count] = fileScanner2.nextLine();
 			count++;
