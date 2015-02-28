@@ -251,7 +251,8 @@ public class TextBuddy {
 	
 	//finds the number of lines currently in file, sorts the lines alphabetically,
 	//and writes over the sort lines into the file
-	private static void sort() {
+	public static String sort() {
+		String message = "";
 		//check the current number of lines in file
 		File newFile = new File(inputFileName);
 		Scanner fileScanner1 = null;
@@ -291,7 +292,7 @@ public class TextBuddy {
 		Arrays.sort(lines);
 		clear();
 		add(lines);
-		display();
+		return display();
 	}
 	
 	//displays the current text in file

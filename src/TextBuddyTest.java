@@ -24,6 +24,7 @@ public class TextBuddyTest {
 		testDisplayAndClear();
 		testDelete();
 		testSearch();
+		testSort();
 	}
 	//tests 2 cases of checkFileName function:
 	//1) when there is no file i.e. create the file
@@ -97,6 +98,20 @@ public class TextBuddyTest {
 				newTest.search("search sea"));
 	}
 
+	//tests 2 cases of sort function:
+	//1) when file is empty
+	//2) when there are lines in file
+	public void testSort() {
+		//when file is empty
+		assertEquals("test.txt is empty\n", newTest.sort());
+		
+		//when there are lines in file
+		newTest.execute("add", "add cde");
+		newTest.execute("add", "add bcd");
+		newTest.execute("add", "add abc");
+		assertEquals("1. abc 2. bcd 3. cde ", newTest.sort());
+	}
+	
 	@AfterClass
 	public static void deleteAfterClass() {
 		test.delete();
