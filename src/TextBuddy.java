@@ -1,8 +1,10 @@
 import java.io.*;
 import java.util.*;
 
-//Assume file to manipulate exists
-//Saves file after each time file is edited
+
+//If the specified file does not exist, TextBuddy will now create one
+//It is assumed users will not exceed 1000 lines
+//File is saved each time it is edited
 
 
 public class TextBuddy {
@@ -19,10 +21,11 @@ public class TextBuddy {
 	private static final String DELETED_MESSAGE = "deleted from %1$s: \"%2$s\"\n";
 	private static final String CANNOT_DELETE_MESSAGE = "Line does not exist in %1$s";
 	private static final String CLEARED_MESSAGE = "all content deleted from %1$s\n";
-	
+	private static final String SEARCH_RESULTS_MESSAGE = "%1$s lines found with \"%2$s\"\n";
+	private static final int MAX_LINES = 1000;
 	
 	private static Scanner scanner = new Scanner(System.in);
-
+	
 	public static void main(String[] args) throws IOException {
 		initialise(args);
 		run();
@@ -50,6 +53,7 @@ public class TextBuddy {
 	//sets inputFileName if the file exists, and informs the user file is ready
 	private static void checkFileName(String inputFileNameTemp) throws IOException {
 		File newFile = new File(inputFileNameTemp);
+		
 		if (!newFile.exists()) {
 			newFile.createNewFile();
 		}
@@ -90,17 +94,23 @@ public class TextBuddy {
 		case "add":
 			message = add(userInput);
 			break;
-		case "display":
-			display();
-			break;
 		case "delete":
 			message = delete(userInput);
+			break;
+		case "search":
+			search(userInput);
+			break;
+		case "sort":
+			sort();
 			break;
 		case "clear":
 			message = clear();
 			break;
 		case "exit":
 			exit();
+			break;
+		case "display":
+			display();
 			break;
 		default:
 			message = WRONG_COMMAND_MESSAGE;
@@ -113,19 +123,159 @@ public class TextBuddy {
 	private static String add(String userInput) {
 		String inputToAdd = getInput(userInput);
 		String message = "";
+		
 		try {
 			FileWriter fw = new FileWriter(inputFileName, true);
 			BufferedWriter bw = new BufferedWriter(fw);
 			 
 			bw.write(inputToAdd + "\n");
 			message = formatMessage(ADDED_MESSAGE, inputFileName, inputToAdd);
-			bw.close();
-
-			
+			bw.close();			
 		 } catch (IOException e) {
 			 showToUser(e.getMessage());
 		 }
 		return message;
+	}
+	
+	//writes an array of lines into the file
+	private static void add(String[] lines) {
+		try {
+			FileWriter fw = new FileWriter(inputFileName, true);
+			BufferedWriter bw = new BufferedWriter(fw);
+			
+			for (int i = 0; i < lines.length; i++) {
+				bw.write(lines[i] + "\n");
+			}
+			
+			bw.close();			
+		 } catch (IOException e) {
+			 showToUser(e.getMessage());
+		 }
+	}
+	
+	//deletes indicated line from file by copying other lines into a new file,
+	//and replacing the original file with the new file
+	private static String delete(String userInput) {
+		String message = "";
+		int indexToDelete = Integer.parseInt(getInput(userInput));
+		
+		try {
+			//
+			File inputFile = new File(inputFileName);
+			FileReader fr = new FileReader(inputFileName);
+			BufferedReader br = new BufferedReader(fr);
+			
+			File tempFile = new File(tempFileName);
+			FileWriter fw = new FileWriter(tempFile);
+			BufferedWriter bw = new BufferedWriter(fw);
+			
+			String str = br.readLine();
+			String removedLine = null;
+			int count = 1;
+			while (str != null) {
+				if (count == indexToDelete) {
+					removedLine = str;
+				} else {
+					bw.write(str);
+					bw.write("\n");
+				}
+				
+				str = br.readLine();
+				count++;
+			}
+			
+			br.close();
+			bw.close();
+			
+			inputFile.delete();
+			tempFile.renameTo(inputFile);
+			
+			if (removedLine == null) {
+				message = CANNOT_DELETE_MESSAGE;
+			} else {
+				message = formatMessage(DELETED_MESSAGE, inputFileName, removedLine);
+			}
+		} catch (Exception e) {
+			showToUser(e.getMessage());
+		}
+		
+		return message;
+	}
+	
+	//search the file for the keyword, printing the line containing the keyword along
+	//with the index in the file it is found. If no keyword is found, the user will be
+	//notified
+	private static void search(String userInput) {
+		String keyword = getInput(userInput);
+		int index = 1;
+		int count = 0;
+		File newFile = new File(inputFileName);
+		Scanner fileScanner = null;
+		
+		try {
+			fileScanner = new Scanner(newFile);
+		} catch (FileNotFoundException e) {
+			showToUser(e.getMessage());
+		}
+		
+		if (!fileScanner.hasNextLine()) {
+			showToUser(formatMessage(EMPTY_MESSAGE, inputFileName));
+		}
+		
+		while (fileScanner.hasNextLine()) {
+			String temp = fileScanner.nextLine();
+
+			if (temp.contains(keyword)) {
+				showToUser(formatMessage(DISPLAY_MESSAGE, index + "", temp));
+				count++;
+			}
+			index++;
+		}
+		
+		showToUser(formatMessage(SEARCH_RESULTS_MESSAGE, Integer.toString(count), keyword));
+		
+		fileScanner.close();
+		
+	}	
+	
+	//finds the number of lines currently in file, sorts the lines alphabetically,
+	//and writes over the sort lines into the file
+	private static void sort() {
+		File newFile = new File(inputFileName);
+		Scanner fileScanner1 = null;
+		try {
+			fileScanner1 = new Scanner(newFile);
+		} catch (FileNotFoundException e) {
+			showToUser(e.getMessage());
+		}
+		
+		//check the current number of lines in file
+		int count = 0;
+		while (fileScanner1.hasNextLine()) {
+			fileScanner1.nextLine();
+			count++;
+		}
+		fileScanner1.close();
+		
+		Scanner fileScanner2 = null;
+		try {
+			fileScanner2 = new Scanner(newFile);
+		} catch (FileNotFoundException e) {
+			showToUser(e.getMessage());
+		}
+		
+		String[] lines = new String[count];
+		count = 0;
+		while (fileScanner2.hasNextLine()) {
+			lines[count] = fileScanner2.nextLine();
+			count++;
+		}
+		fileScanner2.close();
+		
+		Arrays.sort(lines);
+		clear();
+		add(lines);
+		display();
 	}
 	
 	//displays the current text in file
@@ -150,55 +300,7 @@ public class TextBuddy {
 		
 		fileScanner.close();
 	}
-
-	//deletes indicated line from file by copying other lines into a new file, and replacing the original file with the new file
-	private static String delete(String userInput) {
-		String message = "";
-		int indexToDelete = Integer.parseInt(getInput(userInput));
-		
-		try {
-			File inputFile = new File(inputFileName);
-			FileReader fr = new FileReader(inputFile);
-			BufferedReader br = new BufferedReader(fr);
-			
-			File tempFile = new File(tempFileName);
-			FileWriter fw = new FileWriter(tempFile);
-			BufferedWriter bw = new BufferedWriter(fw);
-			
-			String str = br.readLine();
-			String removedLine = null;
-			int count = 1;
-			while (str != null) {
-				if (count == indexToDelete) {
-					removedLine = str;
-				} else {
-					bw.write(str);
-					bw.write("\n");
-				}
-				
-				str = br.readLine();
-				count++;
-			}
-			
-
-			br.close();
-			bw.close();
-			
-			inputFile.delete();
-			tempFile.renameTo(inputFile);
-			
-			if (removedLine == null) {
-				message = CANNOT_DELETE_MESSAGE;
-			} else {
-				message = formatMessage(DELETED_MESSAGE, inputFileName, removedLine);
-			}
-		} catch (Exception e) {
-			showToUser(e.getMessage());
-		}
-		
-		return message;
-	}
-
+	
 	//clears all content from file
 	private static String clear() {
 		PrintWriter pw = null;
@@ -208,7 +310,6 @@ public class TextBuddy {
 			pw.close();
 			
 			message = formatMessage(CLEARED_MESSAGE, inputFileName);
-			
 		} catch (FileNotFoundException e) {
 			message = e.getMessage();
 		}
@@ -222,7 +323,6 @@ public class TextBuddy {
 	//---------------------------------------- END OF run() METHODS ----------------------------------------//
 	
 	//---------------------------------------- GENERAL METHODS ---------------------------------------------//
-
 	//given a text, print the text to show to user
 	private static void showToUser(String text) {
 		System.out.print(text);
