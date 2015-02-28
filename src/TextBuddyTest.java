@@ -19,6 +19,10 @@ public class TextBuddyTest {
 		test.deleteOnExit();
 	}
 
+	public void allTests() throws IOException {
+		testInputFile();
+		testAdd();
+	}
 	//tests for creation of new file
 	@Test
 	public void testInputFile() throws IOException {
@@ -26,6 +30,12 @@ public class TextBuddyTest {
 				newTest.checkFileName("test1.txt"));
 		assertEquals("Welcome to TextBuddy. test.txt is ready for use \n",
 				newTest.checkFileName("test.txt"));
+	}
+	
+	@Test
+	public void testAdd() throws IOException {
+		assertEquals("added to test.txt: \"jumped over the moon\"\n", 
+				newTest.execute("add", "add jumped over the moon"));
 	}
 	
 	@AfterClass
