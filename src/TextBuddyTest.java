@@ -22,6 +22,7 @@ public class TextBuddyTest {
 	public void allTests() throws IOException {
 		testInputFile();
 		testAdd();
+		testDisplay();
 	}
 	//tests for creation of new file
 	@Test
@@ -32,15 +33,22 @@ public class TextBuddyTest {
 				newTest.checkFileName("test.txt"));
 	}
 	
+	//tests if lines are added to the file correctly
 	@Test
 	public void testAdd() throws IOException {
 		assertEquals("added to test.txt: \"jumped over the moon\"\n", 
 				newTest.execute("add", "add jumped over the moon"));
 	}
 	
+	@Test
+	public void testDisplay() throws IOException {
+		newTest.execute("add", "add swam through the sea");
+		assertEquals("1. jumped over the moon 2. swam through the sea ", 
+				newTest.display());
+	}
+	
 	@AfterClass
 	public static void deleteAfterClass() {
-		test.delete();
 		File newFile = new File("test1.txt");
 		newFile.delete();
 	}

@@ -287,7 +287,8 @@ public class TextBuddy {
 	}
 	
 	//displays the current text in file
-	private static void display() {
+	public static String display() {
+		String message = "";
 		int count = 1;
 		File displayFile = new File(inputFileName);
 		Scanner fileScanner = null;
@@ -299,14 +300,24 @@ public class TextBuddy {
 		
 		if (!fileScanner.hasNextLine()) {
 			showToUser(formatMessage(EMPTY_MESSAGE, inputFileName));
+			
+			//for testing only
+			message = formatMessage(EMPTY_MESSAGE, inputFileName);
 		}
 			
 		while (fileScanner.hasNextLine()) {
-			showToUser(formatMessage(DISPLAY_MESSAGE, count + "", fileScanner.nextLine()));
+			String temp = fileScanner.nextLine();
+			showToUser(formatMessage(DISPLAY_MESSAGE, count + "", temp));
+			
+			//------testing only------//
+			message = message.concat(count+ ". " + temp + " ");
+			//--end for testing only--//
+			
 			count++;
 		}
 		
 		fileScanner.close();
+		return message;
 	}
 	
 	//clears all content from file
