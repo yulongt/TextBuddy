@@ -321,7 +321,7 @@ public class TextBuddy {
 	}
 	
 	//clears all content from file
-	private static String clear() {
+	public static String clear() {
 		PrintWriter pw = null;
 		String message = "";
 		try {
